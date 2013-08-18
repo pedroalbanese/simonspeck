@@ -1,5 +1,6 @@
 // Package simon implements the Simon family of NSA block ciphers.
 // For now, I only plan to implement Simon32, Simon64, and Simon128.
+// This implementation is not cryptographically secure.
 // See http://eprint.iacr.org/2013/404
 package simon
 
@@ -52,10 +53,10 @@ func NewSimon32(key uint64) *Simon32Cipher {
 	cipher := new(Simon32Cipher)
 	cipher.rounds = 32
 
-	cipher.k[0] = uint16(key & 0xffff)
-	cipher.k[1] = uint16(key & 0xffff0000 >> 16)
-	cipher.k[2] = uint16(key & 0xffff00000000 >> 32)
-	cipher.k[3] = uint16(key & 0xffff000000000000 >> 48)
+	cipher.k[0] = uint16(key)
+	cipher.k[1] = uint16(key >> 16)
+	cipher.k[2] = uint16(key >> 32)
+	cipher.k[3] = uint16(key >> 48)
 	for i, reg := 4, uint(1); i < cipher.rounds; i++ {
 		tmp := leftRotate16(cipher.k[i-1], 13)
 		tmp ^= cipher.k[i-3]
@@ -89,15 +90,15 @@ func (cipher *Simon32Cipher) Encrypt(dst, src []byte) {
 	if len(src) < 4 || len(dst) < 4 {
 		panic("Simon32Cipher.Encrypt() requires at least one block to encipher.")
 	}
-	x := uint16(src[0]) | (uint16(src[1])<<8)
-	y := uint16(src[2]) | (uint16(src[3])<<8)
+	x := uint16(src[0]) | (uint16(src[1]) << 8)
+	y := uint16(src[2]) | (uint16(src[3]) << 8)
 	for i := 0; i < cipher.rounds; i++ {
 		x, y = Feistel32(cipher.k[i], x, y)
 	}
-	dst[0] = byte(x & 0xff)
-	dst[1] = byte(x >> 8 & 0xff)
-	dst[2] = byte(y & 0xff)
-	dst[3] = byte(y >> 8 & 0xff)
+	dst[0] = byte(x)
+	dst[1] = byte(x >> 8)
+	dst[2] = byte(y)
+	dst[3] = byte(y >> 8)
 }
 
 // Decrypt decrypts the first block in src into dst.
@@ -106,13 +107,13 @@ func (cipher *Simon32Cipher) Decrypt(dst, src []byte) {
 	if len(src) < 4 || len(dst) < 4 {
 		panic("Simon32Cipher.Encrypt() requires at least one block to decipher.")
 	}
-	x := uint16(src[0]) | (uint16(src[1])<<8)
-	y := uint16(src[2]) | (uint16(src[3])<<8)
+	x := uint16(src[0]) | (uint16(src[1]) << 8)
+	y := uint16(src[2]) | (uint16(src[3]) << 8)
 	for i := cipher.rounds - 1; i >= 0; i-- {
 		x, y = DeFeistel32(cipher.k[i], x, y)
 	}
-	dst[0] = byte(x & 0xff)
-	dst[1] = byte(x >> 8 & 0xff)
-	dst[2] = byte(y & 0xff)
-	dst[3] = byte(y >> 8 & 0xff)
+	dst[0] = byte(x)
+	dst[1] = byte(x >> 8)
+	dst[2] = byte(y)
+	dst[3] = byte(y >> 8)
 }

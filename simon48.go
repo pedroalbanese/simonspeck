@@ -49,7 +49,7 @@ func NewSimon48(key []byte) *Simon48Cipher {
 	}
 	cipher.k = make([]uint32, cipher.rounds)
 	for i := 0; i < keyWords; i++ {
-		cipher.k[keyWords-i-1] = littleEndianBytesToUInt24(key[3*i : 3*i+3])
+		cipher.k[i] = littleEndianBytesToUInt24(key[3*i : 3*i+3])
 	}
 	for i := keyWords; i < cipher.rounds; i++ {
 		tmp := leftRotate24(cipher.k[i-1], 21)
@@ -76,25 +76,25 @@ func simonScramble24(x uint32) uint32 {
 // Encrypt encrypts the first block in src into dst.
 // Dst and src may point at the same memory. See crypto/cipher.
 func (cipher *Simon48Cipher) Encrypt(dst, src []byte) {
-	x := littleEndianBytesToUInt24(src[0:3])
-	y := littleEndianBytesToUInt24(src[3:6])
+	y := littleEndianBytesToUInt24(src[0:3])
+	x := littleEndianBytesToUInt24(src[3:6])
 	for i := 0; i < cipher.rounds; i += 2 {
 		y ^= simonScramble24(x) ^ cipher.k[i]
 		x ^= simonScramble24(y) ^ cipher.k[i+1]
 	}
-	storeLittleEndianUInt24(dst[0:3], x)
-	storeLittleEndianUInt24(dst[3:6], y)
+	storeLittleEndianUInt24(dst[0:3], y)
+	storeLittleEndianUInt24(dst[3:6], x)
 }
 
 // Decrypt decrypts the first block in src into dst.
 // Dst and src may point at the same memory. See crypto/cipher.
 func (cipher *Simon48Cipher) Decrypt(dst, src []byte) {
-	x := littleEndianBytesToUInt24(src[0:3])
-	y := littleEndianBytesToUInt24(src[3:6])
+	y := littleEndianBytesToUInt24(src[0:3])
+	x := littleEndianBytesToUInt24(src[3:6])
 	for i := cipher.rounds - 1; i >= 0; i -= 2 {
 		x ^= simonScramble24(y) ^ cipher.k[i]
 		y ^= simonScramble24(x) ^ cipher.k[i-1]
 	}
-	storeLittleEndianUInt24(dst[0:3], x)
-	storeLittleEndianUInt24(dst[3:6], y)
+	storeLittleEndianUInt24(dst[0:3], y)
+	storeLittleEndianUInt24(dst[3:6], x)
 }

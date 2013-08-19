@@ -94,30 +94,40 @@ func TestSuppliedVectors(t *testing.T) {
 	}
 }
 
+func randomSlice(length int) []byte {
+	s := make([]byte, length)
+	for i, _ := range s {
+		s[i] = byte(rand.Int())
+	}
+	return s
+}
+
 func TestEncDec32(t *testing.T) {
-	key := make([]byte, 8)
-	for i, _ := range key {
-		key[i] = byte(rand.Int() & 0xff)
+	var names = []string{
+		"Simon32/64",
+		"Simon64/96",
+		"Simon64/128",
 	}
-	simon32 := NewSimon32(key)
-	iv := make([]byte, 4)
-	for i, _ := range iv {
-		iv[i] = byte(rand.Int() & 0xff)
+	var ciphers = []cipher.Block{
+		NewSimon32(randomSlice(8)),
+		NewSimon64(randomSlice(12)),
+		NewSimon64(randomSlice(16)),
 	}
-	// We make sure to use CBC as it uses both encryption and decryption.
-	enc := cipher.NewCBCEncrypter(simon32, iv)
-	dec := cipher.NewCBCDecrypter(simon32, iv)
-	plaintext := make([]byte, 16384*simon32.BlockSize())
-	ciphertext := make([]byte, 16384*simon32.BlockSize())
-	for i, _ := range plaintext {
-		plaintext[i] = byte(rand.Int() & 0xff)
-	}
-	enc.CryptBlocks(ciphertext, plaintext)
-	dec.CryptBlocks(ciphertext, ciphertext)
-	for i, p := range plaintext {
-		if p != ciphertext[i] {
-			t.Errorf("Encryption followed by decryption failed.")
-			break
+
+	for _, c := range ciphers {
+		iv := randomSlice(c.BlockSize())
+		// We use CBC as it uses both encryption and decryption.
+		enc := cipher.NewCBCEncrypter(c, iv)
+		dec := cipher.NewCBCDecrypter(c, iv)
+		plaintext := randomSlice(16384 * c.BlockSize())
+		ciphertext := make([]byte, 16384*c.BlockSize())
+		enc.CryptBlocks(ciphertext, plaintext)
+		dec.CryptBlocks(ciphertext, ciphertext)
+		for i, p := range plaintext {
+			if p != ciphertext[i] {
+				t.Errorf("Encryption followed by decryption failed for %s.", names[i])
+				break
+			}
 		}
 	}
 }

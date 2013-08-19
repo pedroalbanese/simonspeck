@@ -1,7 +1,8 @@
 // Package simon implements the Simon family of NSA block ciphers.
-// This implementation is not cryptographically secure. See
-// http://eprint.iacr.org/2013/404 for a description of the algorithms
-// in question.
+// It is a straightforward translation of the pseudocode in the paper [1] into golang.
+// This implementation is not cryptographically secure.
+//
+// [1]: http://eprint.iacr.org/2013/404
 package simon
 
 const (
@@ -163,7 +164,7 @@ func NewSimon64(key []byte) *Simon64Cipher {
 	var lfsr func(uint) uint
 
 	switch len(key) {
-	case 12: // 96-bit key
+	case 12:
 		cipher.keyWords = 3
 		cipher.rounds = roundsSimon64_96
 		cipher.k = make([]uint32, cipher.rounds)
@@ -171,7 +172,7 @@ func NewSimon64(key []byte) *Simon64Cipher {
 			cipher.k[cipher.keyWords-i-1] = littleEndianBytesToUInt32(key[4*i : 4*i+4])
 		}
 		lfsr = ShiftU
-	case 16: // 128-bit key
+	case 16:
 		cipher.keyWords = 4
 		cipher.rounds = roundsSimon64_128
 		cipher.k = make([]uint32, cipher.rounds)
@@ -200,7 +201,6 @@ func (cipher *Simon64Cipher) BlockSize() int {
 	return 8
 }
 
-// simonScramble16 is the only non-affine component of the Simon block cipher.
 func simonScramble32(x uint32) uint32 {
 	return (leftRotate32(x, 1) & leftRotate32(x, 8)) ^ leftRotate32(x, 2)
 }

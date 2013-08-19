@@ -11,6 +11,10 @@ func leftRotate48(n uint64, shift uint) uint64 {
 	return ((n << shift) & bitMask48) | (n >> (48 - shift))
 }
 
+func rightRotate48(n uint64, shift uint) uint64 {
+	return leftRotate48(n, 48-shift)
+}
+
 // Use NewSimon96 below to expand a Simon96 key. Simon96Cipher
 // implements the cipher.Block interface.
 type Simon96Cipher struct {
@@ -58,8 +62,8 @@ func NewSimon96(key []byte) *Simon96Cipher {
 		cipher.k[i] = littleEndianBytesToUInt48(key[6*i : 6*i+6])
 	}
 	for i := keyWords; i < cipher.rounds; i++ {
-		tmp := leftRotate48(cipher.k[i-1], 45)
-		tmp ^= leftRotate48(tmp, 47)
+		tmp := rightRotate48(cipher.k[i-1], 3)
+		tmp ^= rightRotate48(tmp, 1)
 		lfsrBit := (z >> uint((i-keyWords)%62)) & 1
 		cipher.k[i] = ^cipher.k[i-keyWords] ^ tmp ^ uint64(lfsrBit) ^ 3
 		cipher.k[i] &= bitMask48

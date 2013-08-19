@@ -10,6 +10,10 @@ func leftRotate64(n uint64, shift uint) uint64 {
 	return (n << shift) | (n >> (64 - shift))
 }
 
+func rightRotate64(n uint64, shift uint) uint64 {
+	return leftRotate64(n, 64-shift)
+}
+
 // Use NewSimon128 below to expand a Simon128 key. Simon128Cipher
 // implements the cipher.Block interface.
 type Simon128Cipher struct {
@@ -61,11 +65,11 @@ func NewSimon128(key []byte) *Simon128Cipher {
 		cipher.k[i] = littleEndianBytesToUInt64(key[8*i : 8*i+8])
 	}
 	for i := keyWords; i < cipher.rounds; i++ {
-		tmp := leftRotate64(cipher.k[i-1], 61)
+		tmp := rightRotate64(cipher.k[i-1], 3)
 		if keyWords == 4 {
 			tmp ^= cipher.k[i-3]
 		}
-		tmp ^= leftRotate64(tmp, 63)
+		tmp ^= rightRotate64(tmp, 1)
 		lfsrBit := (z >> uint((i-keyWords)%62)) & 1
 		cipher.k[i] = ^cipher.k[i-keyWords] ^ tmp ^ uint64(lfsrBit) ^ 3
 	}

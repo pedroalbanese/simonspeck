@@ -67,7 +67,7 @@ func NewSimon96(key []byte) *Simon96Cipher {
 	return cipher
 }
 
-// Simon96 has a 128-bit block length.
+// Simon96 has a 96-bit block length.
 func (cipher *Simon96Cipher) BlockSize() int {
 	return 12
 }

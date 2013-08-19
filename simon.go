@@ -1,8 +1,21 @@
 // Package simon implements the Simon family of NSA block ciphers.
-// For now, I only plan to implement Simon32, Simon64, and Simon128.
-// This implementation is not cryptographically secure.
-// See http://eprint.iacr.org/2013/404
+// This implementation is not cryptographically secure. See
+// http://eprint.iacr.org/2013/404 for a description of the algorithms
+// in question.
 package simon
+
+const (
+	roundsSimon32_64   = 32
+	roundsSimon48_72   = 36
+	roundsSimon48_96   = 36
+	roundsSimon64_96   = 42
+	roundsSimon64_128  = 44
+	roundsSimon96_96   = 52
+	roundsSimon96_144  = 54
+	roundsSimon128_128 = 68
+	roundsSimon128_192 = 69
+	roundsSimon128_256 = 72
+)
 
 func leftRotate16(n uint16, shift uint) uint16 {
 	return (n << shift) | (n >> (16 - shift))
@@ -42,22 +55,25 @@ func ShiftW(reg uint) uint {
 	return s
 }
 
-// Use NewSimon32 below to expand a Simon32 key.
+// Use NewSimon32 below to expand a Simon32 key. Simon32Cipher
+// implements the cipher.Block interface.
 type Simon32Cipher struct {
-	k      [32]uint16
-	rounds int
+	k [32]uint16
 }
 
-// NewSimon32 creates and returns a new Simon32Cipher, which implements cipher.Block.
-func NewSimon32(key uint64) *Simon32Cipher {
+// NewSimon32 creates and returns a new Simon32Cipher. To compare with
+// the test vectors in the NSA paper, the key should be given as 4
+// little-endian 16-bit words.
+func NewSimon32(key []byte) *Simon32Cipher {
 	cipher := new(Simon32Cipher)
-	cipher.rounds = 32
 
-	cipher.k[0] = uint16(key)
-	cipher.k[1] = uint16(key >> 16)
-	cipher.k[2] = uint16(key >> 32)
-	cipher.k[3] = uint16(key >> 48)
-	for i, reg := 4, uint(1); i < cipher.rounds; i++ {
+	if len(key) != 8 {
+		panic("NewSimon32 requires an 8-byte key")
+	}
+	for i := 0; i < 4; i++ {
+		cipher.k[i] = uint16(key[2*i]) | (uint16(key[2*i+1]) << 8)
+	}
+	for i, reg := 4, uint(1); i < roundsSimon32_64; i++ {
 		tmp := leftRotate16(cipher.k[i-1], 13)
 		tmp ^= cipher.k[i-3]
 		tmp ^= leftRotate16(tmp, 15)
@@ -72,16 +88,9 @@ func (cipher *Simon32Cipher) BlockSize() int {
 	return 4
 }
 
-// Feistel32 implements one round of Simon32 encryption.
-func Feistel32(key, x, y uint16) (uint16, uint16) {
-	fx := (leftRotate16(x, 1) & leftRotate16(x, 8)) ^ leftRotate16(x, 2)
-	return y ^ fx ^ key, x
-}
-
-// DeFeistel32 implements one round of Simon32 decryption.
-func DeFeistel32(key, x, y uint16) (uint16, uint16) {
-	fy := (leftRotate16(y, 1) & leftRotate16(y, 8)) ^ leftRotate16(y, 2)
-	return y, x ^ fy ^ key
+// simonScramble16 is the only non-affine component of the Simon block cipher.
+func simonScramble16(x uint16) uint16 {
+	return (leftRotate16(x, 1) & leftRotate16(x, 8)) ^ leftRotate16(x, 2)
 }
 
 // Encrypt encrypts the first block in src into dst.
@@ -92,8 +101,9 @@ func (cipher *Simon32Cipher) Encrypt(dst, src []byte) {
 	}
 	x := uint16(src[0]) | (uint16(src[1]) << 8)
 	y := uint16(src[2]) | (uint16(src[3]) << 8)
-	for i := 0; i < cipher.rounds; i++ {
-		x, y = Feistel32(cipher.k[i], x, y)
+	for i := 0; i < roundsSimon32_64; i += 2 {
+		y ^= simonScramble16(x) ^ cipher.k[i]
+		x ^= simonScramble16(y) ^ cipher.k[i+1]
 	}
 	dst[0] = byte(x)
 	dst[1] = byte(x >> 8)
@@ -109,8 +119,9 @@ func (cipher *Simon32Cipher) Decrypt(dst, src []byte) {
 	}
 	x := uint16(src[0]) | (uint16(src[1]) << 8)
 	y := uint16(src[2]) | (uint16(src[3]) << 8)
-	for i := cipher.rounds - 1; i >= 0; i-- {
-		x, y = DeFeistel32(cipher.k[i], x, y)
+	for i := roundsSimon32_64 - 1; i >= 0; i -= 2 {
+		x ^= simonScramble16(y) ^ cipher.k[i]
+		y ^= simonScramble16(x) ^ cipher.k[i-1]
 	}
 	dst[0] = byte(x)
 	dst[1] = byte(x >> 8)

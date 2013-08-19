@@ -49,8 +49,8 @@ func TestShiftW(t *testing.T) {
 }
 
 func TestEncrypt32(t *testing.T) {
-	var key = uint64(0x1918111009080100)
 	// Note that these are given as little-endian words in the reference paper.
+	var key = []byte{0x00, 0x01, 0x08, 0x09, 0x10, 0x11, 0x18, 0x19}
 	var plaintext = []byte{0x65, 0x65, 0x77, 0x68}
 	var ciphertext = []byte{0x9b, 0xc6, 0xbb, 0xe9}
 
@@ -64,14 +64,20 @@ func TestEncrypt32(t *testing.T) {
 }
 
 func TestEncDec32(t *testing.T) {
-	key := uint64(rand.Int63()) ^ (uint64(rand.Int63()) << 1)
-	iv := []byte{0x00, 0xff, 0x00, 0xff}
+	key := make([]byte, 8)
+	for i, _ := range key {
+		key[i] = byte(rand.Int() & 0xff)
+	}
 	simon32 := NewSimon32(key)
+	iv := make([]byte, 4)
+	for i, _ := range iv {
+		iv[i] = byte(rand.Int() & 0xff)
+	}
 	// We make sure to use CBC as it uses both encryption and decryption.
 	enc := cipher.NewCBCEncrypter(simon32, iv)
 	dec := cipher.NewCBCDecrypter(simon32, iv)
-	plaintext := make([]byte, 1024*simon32.BlockSize())
-	ciphertext := make([]byte, 1024*simon32.BlockSize())
+	plaintext := make([]byte, 16384*simon32.BlockSize())
+	ciphertext := make([]byte, 16384*simon32.BlockSize())
 	for i, _ := range plaintext {
 		plaintext[i] = byte(rand.Int() & 0xff)
 	}

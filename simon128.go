@@ -13,10 +13,10 @@ type Simon128Cipher struct {
 	rounds int
 }
 
-// NewSimon64 creates and returns a new Simon64Cipher. It accepts
-// either a 96-bit key (for Simon64/96) or a 128-bit key (for
-// Simon64/128). See the documentation on Simon32 or the test suite
-// for our endianness convention.
+// NewSimon128 creates and returns a new Simon128Cipher. It accepts a
+// 128-bit key (for Simon128/128), a 196-bit key (for Simon128/196),
+// or a 256-bit key (for Simon128/256). See the documentation on
+// Simon32 or the test suite for our endianness convention.
 func NewSimon128(key []byte) *Simon128Cipher {
 	cipher := new(Simon128Cipher)
 	var keyWords int

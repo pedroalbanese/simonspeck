@@ -154,6 +154,24 @@ var testVectors = []testVector{
 		convertTestData("3b726574 7475432d"),
 		convertTestData("8c6fa548 454e028b"),
 	},
+	testVector{
+		"Speck128/128",
+		NewSpeck128(convertTestData("0f0e0d0c0b0a0908 0706050403020100")),
+		convertTestData("6c61766975716520 7469206564616d20"),
+		convertTestData("a65d985179783265 7860fedf5c570d18"),
+	},
+	testVector{
+		"Speck128/192",
+		NewSpeck128(convertTestData("1716151413121110 0f0e0d0c0b0a0908 0706050403020100")),
+		convertTestData("7261482066656968 43206f7420746e65"),
+		convertTestData("1be4cf3a13135566 f9bc185de03c1886"),
+	},
+	testVector{
+		"Speck128/256",
+		NewSpeck128(convertTestData("1f1e1d1c1b1a1918 1716151413121110 0f0e0d0c0b0a0908 0706050403020100")),
+		convertTestData("65736f6874206e49 202e72656e6f6f70"),
+		convertTestData("4109010405c0f53e 4eeeb48d9c188f43"),
+	},
 }
 
 func TestSuppliedVectors(t *testing.T) {
@@ -180,31 +198,21 @@ func randomSlice(length int) []byte {
 func TestEncDec32(t *testing.T) {
 	var names = []string{
 		"Simon32/64",
-		"Simon48/72",
 		"Simon48/96",
-		"Simon64/96",
 		"Simon64/128",
-		"Simon96/96",
 		"Simon96/144",
-		"Simon128/128",
-		"Simon128/192",
 		"Simon128/256",
-		"Speck64/96",
 		"Speck64/128",
+		"Speck128/256",
 	}
 	var ciphers = []cipher.Block{
 		NewSimon32(randomSlice(8)),
-		NewSimon48(randomSlice(9)),
 		NewSimon48(randomSlice(12)),
-		NewSimon64(randomSlice(12)),
 		NewSimon64(randomSlice(16)),
-		NewSimon96(randomSlice(12)),
 		NewSimon96(randomSlice(18)),
-		NewSimon128(randomSlice(16)),
-		NewSimon128(randomSlice(24)),
 		NewSimon128(randomSlice(32)),
-		NewSpeck64(randomSlice(12)),
 		NewSpeck64(randomSlice(16)),
+		NewSpeck128(randomSlice(32)),
 	}
 
 	for j, c := range ciphers {

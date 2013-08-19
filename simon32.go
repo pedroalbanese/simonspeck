@@ -2,27 +2,10 @@ package simonspeck
 
 const roundsSimon32_64 = 32
 
-func leftRotate16(n uint16, shift uint) uint16 {
-	return (n << shift) | (n >> (16 - shift))
-}
-
-func rightRotate16(n uint16, shift uint) uint16 {
-	return leftRotate16(n, 16-shift)
-}
-
 // Use NewSimon32 below to expand a Simon32 key. Simon32Cipher
 // implements the cipher.Block interface.
 type Simon32Cipher struct {
 	k [32]uint16
-}
-
-func littleEndianBytesToUInt16(b []byte) uint16 {
-	return uint16(b[0]) | (uint16(b[1]) << 8)
-}
-
-func storeLittleEndianUInt16(dst []byte, n uint16) {
-	dst[0] = byte(n)
-	dst[1] = byte(n >> 8)
 }
 
 // NewSimon32 creates and returns a new Simon32Cipher. To compare with

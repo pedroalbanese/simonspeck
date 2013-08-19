@@ -3,37 +3,13 @@ package simonspeck
 const (
 	roundsSimon96_96  = 52
 	roundsSimon96_144 = 54
-
-	bitMask48 = 0x0000ffffffffffff
 )
-
-func leftRotate48(n uint64, shift uint) uint64 {
-	return ((n << shift) & bitMask48) | (n >> (48 - shift))
-}
-
-func rightRotate48(n uint64, shift uint) uint64 {
-	return leftRotate48(n, 48-shift)
-}
 
 // Use NewSimon96 below to expand a Simon96 key. Simon96Cipher
 // implements the cipher.Block interface.
 type Simon96Cipher struct {
 	k      []uint64
 	rounds int
-}
-
-func littleEndianBytesToUInt48(b []byte) uint64 {
-	r := uint64(0)
-	for i := uint(0); i < 6; i++ {
-		r |= uint64(b[i]) << (8 * i)
-	}
-	return r
-}
-
-func storeLittleEndianUInt48(dst []byte, n uint64) {
-	for i := uint(0); i < 6; i++ {
-		dst[i] = byte(n >> (8 * i))
-	}
 }
 
 // NewSimon64 creates and returns a new Simon64Cipher. It accepts

@@ -6,33 +6,11 @@ const (
 	roundsSimon128_256 = 72
 )
 
-func leftRotate64(n uint64, shift uint) uint64 {
-	return (n << shift) | (n >> (64 - shift))
-}
-
-func rightRotate64(n uint64, shift uint) uint64 {
-	return leftRotate64(n, 64-shift)
-}
-
 // Use NewSimon128 below to expand a Simon128 key. Simon128Cipher
 // implements the cipher.Block interface.
 type Simon128Cipher struct {
 	k      []uint64
 	rounds int
-}
-
-func littleEndianBytesToUInt64(b []byte) uint64 {
-	r := uint64(0)
-	for i := uint(0); i < 8; i++ {
-		r |= uint64(b[i]) << (8 * i)
-	}
-	return r
-}
-
-func storeLittleEndianUInt64(dst []byte, n uint64) {
-	for i := uint(0); i < 8; i++ {
-		dst[i] = byte(n >> (8 * i))
-	}
 }
 
 // NewSimon64 creates and returns a new Simon64Cipher. It accepts

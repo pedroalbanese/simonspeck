@@ -71,7 +71,7 @@ func NewSimon32(key []byte) *Simon32Cipher {
 		panic("NewSimon32 requires an 8-byte key")
 	}
 	for i := 0; i < 4; i++ {
-		cipher.k[i] = uint16(key[2*i]) | (uint16(key[2*i+1]) << 8)
+		cipher.k[3-i] = uint16(key[2*i]) | (uint16(key[2*i+1]) << 8)
 	}
 	for i, reg := 4, uint(1); i < roundsSimon32_64; i++ {
 		tmp := leftRotate16(cipher.k[i-1], 13)

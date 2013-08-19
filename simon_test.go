@@ -48,17 +48,34 @@ func TestShiftW(t *testing.T) {
 	}
 }
 
-func TestEncrypt32(t *testing.T) {
-	// Note that these are given as little-endian words in the reference paper.
-	var key = []byte{0x00, 0x01, 0x08, 0x09, 0x10, 0x11, 0x18, 0x19}
-	var plaintext = []byte{0x65, 0x65, 0x77, 0x68}
-	var ciphertext = []byte{0x9b, 0xc6, 0xbb, 0xe9}
+type testVector struct {
+	name       string
+	cipher     cipher.Block
+	plaintext  []byte
+	ciphertext []byte
+}
 
-	var cipher = NewSimon32(key)
-	cipher.Encrypt(plaintext, plaintext)
-	for i := 0; i < len(plaintext); i++ {
-		if ciphertext[i] != plaintext[i] {
-			t.Errorf("Bad encryption; expecting 0x%02x, got 0x%02x", ciphertext[i], plaintext[i])
+// The endianness of these test vectors is a bit of a mess in the
+// paper. The plaintext/ciphertext pairs are given in words; my code
+// is little-endian, so the orders of the bytes in words are reversed.
+// Note that the key is given "in reverse" in the pseudocode.
+var testVectorSimon32_64 = testVector{
+	"Simon32/64",
+	NewSimon32([]byte{0x18, 0x19, 0x10, 0x11, 0x08, 0x09, 0x00, 0x01}),
+	[]byte{0x65, 0x65, 0x77, 0x68},
+	[]byte{0x9b, 0xc6, 0xbb, 0xe9},
+}
+
+var testVectors = []testVector{testVectorSimon32_64}
+
+func TestEncrypt32(t *testing.T) {
+	for _, testVec := range testVectors {
+		output := make([]byte, len(testVec.ciphertext))
+		testVec.cipher.Encrypt(output, testVec.plaintext)
+		for i, c := range testVec.ciphertext {
+			if c != output[i] {
+				t.Errorf("Bad encryption for %s; expecting 0x%02x, got 0x%02x", testVec.name, c, output[i])
+			}
 		}
 	}
 }

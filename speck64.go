@@ -12,6 +12,10 @@ type Speck64Cipher struct {
 	rounds int
 }
 
+// NewSpeck64 creates and returns a new Speck64Cipher. It accepts
+// either a 96-bit key (for Speck64/96) or a 128-bit key (for
+// Speck64/128). See the documentation on Simon32 or the test suite
+// for our endianness convention.
 func NewSpeck64(key []byte) *Speck64Cipher {
 	cipher := new(Speck64Cipher)
 	var keyWords int
@@ -40,10 +44,13 @@ func NewSpeck64(key []byte) *Speck64Cipher {
 	return cipher
 }
 
+// Speck64 has a 64-bit block length.
 func (cipher *Speck64Cipher) BlockSize() int {
 	return 8
 }
 
+// Encrypt encrypts the first block in src into dst.
+// Dst and src may point at the same memory. See crypto/cipher.
 func (cipher *Speck64Cipher) Encrypt(dst, src []byte) {
 	y := littleEndianBytesToUInt32(src[0:4])
 	x := littleEndianBytesToUInt32(src[4:8])
@@ -56,6 +63,8 @@ func (cipher *Speck64Cipher) Encrypt(dst, src []byte) {
 	storeLittleEndianUInt32(dst[4:8], x)
 }
 
+// Decrypt decrypts the first block in src into dst.
+// Dst and src may point at the same memory. See crypto/cipher.
 func (cipher *Speck64Cipher) Decrypt(dst, src []byte) {
 	y := littleEndianBytesToUInt32(src[0:4])
 	x := littleEndianBytesToUInt32(src[4:8])

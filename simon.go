@@ -16,6 +16,12 @@ const (
 	roundsSimon128_128 = 68
 	roundsSimon128_192 = 69
 	roundsSimon128_256 = 72
+
+	zSeq0 = 0xd9c3522fb386a45f
+	zSeq1 = 0x56864fb8ad0c9f71
+	zSeq2 = 0x7369f885192c0ef5
+	zSeq3 = 0xfc2ce51207a635db
+	zSeq4 = 0xfdc94c3a046d678b
 )
 
 func leftRotate16(n uint16, shift uint) uint16 {
@@ -139,9 +145,8 @@ func (cipher *Simon32Cipher) Decrypt(dst, src []byte) {
 // Use NewSimon64 below to expand a Simon64 key. Simon64Cipher
 // implements the cipher.Block interface.
 type Simon64Cipher struct {
-	k        []uint32
-	rounds   int // 42 for 96-bit key, 44 for 128-bit
-	keyWords int // m in the original paper
+	k      []uint32
+	rounds int // 42 for 96-bit key, 44 for 128-bit
 }
 
 func littleEndianBytesToUInt32(b []byte) uint32 {
@@ -161,37 +166,37 @@ func storeLittleEndianUInt32(dst []byte, n uint32) {
 // for our endianness convention.
 func NewSimon64(key []byte) *Simon64Cipher {
 	cipher := new(Simon64Cipher)
-	var lfsr func(uint) uint
+	var keyWords int
+	var z uint64
 
 	switch len(key) {
 	case 12:
-		cipher.keyWords = 3
+		keyWords = 3
+		z = zSeq2
 		cipher.rounds = roundsSimon64_96
 		cipher.k = make([]uint32, cipher.rounds)
-		for i := 0; i < cipher.keyWords; i++ {
-			cipher.k[cipher.keyWords-i-1] = littleEndianBytesToUInt32(key[4*i : 4*i+4])
+		for i := 0; i < keyWords; i++ {
+			cipher.k[keyWords-i-1] = littleEndianBytesToUInt32(key[4*i : 4*i+4])
 		}
-		lfsr = ShiftU
 	case 16:
-		cipher.keyWords = 4
+		keyWords = 4
+		z = zSeq3
 		cipher.rounds = roundsSimon64_128
 		cipher.k = make([]uint32, cipher.rounds)
-		for i := 0; i < cipher.keyWords; i++ {
-			cipher.k[cipher.keyWords-i-1] = littleEndianBytesToUInt32(key[4*i : 4*i+4])
+		for i := 0; i < keyWords; i++ {
+			cipher.k[keyWords-i-1] = littleEndianBytesToUInt32(key[4*i : 4*i+4])
 		}
-		lfsr = ShiftV
 	default:
 		panic("NewSimon64() requires either a 96- or 128-bit key")
 	}
-	for i, reg, bit := cipher.keyWords, uint(1), uint32(0); i < cipher.rounds; i++ {
+	for i := keyWords; i < cipher.rounds; i++ {
 		tmp := leftRotate32(cipher.k[i-1], 29)
-		if cipher.keyWords == 4 {
+		if keyWords == 4 {
 			tmp ^= cipher.k[i-3]
 		}
 		tmp ^= leftRotate32(tmp, 31)
-		cipher.k[i] = ^cipher.k[i-cipher.keyWords] ^ tmp ^ uint32(reg&1) ^ bit ^ 3
-		reg = lfsr(reg)
-		bit ^= 1
+		lfsrBit := (z >> uint((i-keyWords)%62)) & 1
+		cipher.k[i] = ^cipher.k[i-keyWords] ^ tmp ^ uint32(lfsrBit) ^ 3
 	}
 	return cipher
 }

@@ -1,0 +1,10 @@
+* simonspeck
+
+Package simonspeck implements the Simon and Speck families of NSA
+block ciphers. It is a straightforward translation of the pseudocode
+in the paper [[http://eprint.iacr.org/2013/404][Beaulieu, et al]] into golang. Each cipher implements the
+cipher.Block interface (godoc crypto/cipher). THIS IMPLEMENTATION IS
+NOT CRYPTOGRAPHICALLY SECURE. For details on this implementation, see
+the inline documentation.
+
+ - Beaulieu, et al :: http://eprint.iacr.org/2013/404

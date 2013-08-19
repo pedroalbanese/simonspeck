@@ -1,3 +1,7 @@
+// Copyright 2013 Samuel Isaacson. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 package simonspeck
 
 const roundsSimon32_64 = 32

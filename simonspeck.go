@@ -1,3 +1,7 @@
+// Copyright 2013 Samuel Isaacson. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
+
 // Package simonspeck implements the Simon and Speck families of NSA
 // block ciphers. It is a straightforward translation of the
 // pseudocode in the paper [1] into golang. THIS IMPLEMENTATION IS NOT

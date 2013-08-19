@@ -12,39 +12,40 @@ func TestRotate(t *testing.T) {
 	}
 }
 
-func TestShiftU(t *testing.T) {
-	const uOutput = "11111010001001010110000111001101111101000100101011000011100110"
-	var reg uint = 1
-
-	for i, bit := range uOutput {
-		if (bit == '1' && reg&1 == 0) || (bit == '0' && reg&1 == 1) {
-			t.Errorf("Bad output at step %d of U LFSR", i)
-		}
-		reg = ShiftU(reg)
-	}
+type testLFSRVector struct {
+	name         string
+	binaryOutput string
+	lfsr         func(uint) uint
 }
 
-func TestShiftV(t *testing.T) {
-	const vOutput = "10001110111110010011000010110101000111011111001001100001011010"
-	var reg uint = 1
-
-	for i, bit := range vOutput {
-		if (bit == '1' && reg&1 == 0) || (bit == '0' && reg&1 == 1) {
-			t.Errorf("Bad output at step %d of V LFSR", i)
-		}
-		reg = ShiftV(reg)
-	}
+var testLFSRVectors = []testLFSRVector{
+	testLFSRVector{
+		"ShiftU",
+		"11111010001001010110000111001101111101000100101011000011100110",
+		ShiftU,
+	},
+	testLFSRVector{
+		"ShiftV",
+		"10001110111110010011000010110101000111011111001001100001011010",
+		ShiftV,
+	},
+	testLFSRVector{
+		"ShiftW",
+		"10000100101100111110001101110101000010010110011111000110111010",
+		ShiftW,
+	},
 }
 
-func TestShiftW(t *testing.T) {
-	const wOutput = "10000100101100111110001101110101000010010110011111000110111010"
-	var reg uint = 1
-
-	for i, bit := range wOutput {
-		if (bit == '1' && reg&1 == 0) || (bit == '0' && reg&1 == 1) {
-			t.Errorf("Bad output at step %d of W LFSR", i)
+func TestShift(t *testing.T) {
+	for _, testVec := range testLFSRVectors {
+		reg := uint(1)
+		for i, c := range testVec.binaryOutput {
+			if reg&1 == 1 && c == '0' || reg&1 == 0 && c == '1' {
+				t.Errorf("Bad output at bit %d of LFSR %s\n", i, testVec.name)
+				break
+			}
+			reg = testVec.lfsr(reg)
 		}
-		reg = ShiftW(reg)
 	}
 }
 

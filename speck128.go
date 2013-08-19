@@ -6,7 +6,7 @@ const (
 	roundsSpeck128_256 = 34
 )
 
-// Use NewSpeck128 below to expand a Simon64 key. Speck128Cipher
+// Use NewSpeck128 below to expand a Speck128 key. Speck128Cipher
 // implements the cipher.Block interface.
 type Speck128Cipher struct {
 	k      []uint64

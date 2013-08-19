@@ -143,6 +143,24 @@ var testVectors = []testVector{
 		convertTestData("8d2b5579afc8a3a0 3bf72a87efe7b868"),
 	},
 	testVector{
+		"Speck32/64",
+		NewSpeck32(convertTestData("1918 1110 0908 0100")),
+		convertTestData("6574 694c"),
+		convertTestData("a868 42f2"),
+	},
+	testVector{
+		"Speck48/72",
+		NewSpeck48(convertTestData("121110 0a0908 020100")),
+		convertTestData("20796c 6c6172"),
+		convertTestData("c049a5 385adc"),
+	},
+	testVector{
+		"Speck48/96",
+		NewSpeck48(convertTestData("1a1918 121110 0a0908 020100")),
+		convertTestData("6d2073 696874"),
+		convertTestData("735e10 b6445d"),
+	},
+	testVector{
 		"Speck64/96",
 		NewSpeck64(convertTestData("13121110 0b0a0908 03020100")),
 		convertTestData("74614620 736e6165"),
@@ -153,6 +171,18 @@ var testVectors = []testVector{
 		NewSpeck64(convertTestData("1b1a1918 13121110 0b0a0908 03020100")),
 		convertTestData("3b726574 7475432d"),
 		convertTestData("8c6fa548 454e028b"),
+	},
+	testVector{
+		"Speck96/96",
+		NewSpeck96(convertTestData("0d0c0b0a0908 050403020100")),
+		convertTestData("65776f68202c 656761737520"),
+		convertTestData("9e4d09ab7178 62bdde8f79aa"),
+	},
+	testVector{
+		"Speck96/144",
+		NewSpeck96(convertTestData("151413121110 0d0c0b0a0908 050403020100")),
+		convertTestData("656d6974206e 69202c726576"),
+		convertTestData("2bf31072228a 7ae440252ee6"),
 	},
 	testVector{
 		"Speck128/128",
@@ -202,7 +232,10 @@ func TestEncDec32(t *testing.T) {
 		"Simon64/128",
 		"Simon96/144",
 		"Simon128/256",
+		"Speck32/64",
+		"Speck48/96",
 		"Speck64/128",
+		"Speck96/144",
 		"Speck128/256",
 	}
 	var ciphers = []cipher.Block{
@@ -211,7 +244,10 @@ func TestEncDec32(t *testing.T) {
 		NewSimon64(randomSlice(16)),
 		NewSimon96(randomSlice(18)),
 		NewSimon128(randomSlice(32)),
+		NewSpeck32(randomSlice(8)),
+		NewSpeck48(randomSlice(12)),
 		NewSpeck64(randomSlice(16)),
+		NewSpeck96(randomSlice(18)),
 		NewSpeck128(randomSlice(32)),
 	}
 
@@ -230,5 +266,6 @@ func TestEncDec32(t *testing.T) {
 				break
 			}
 		}
+		t.Logf("Encryption followed by decryption suceeded for %s.", names[j])
 	}
 }

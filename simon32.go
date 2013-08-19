@@ -1,5 +1,7 @@
 package simon
 
+const roundsSimon32_64 = 32
+
 func leftRotate16(n uint16, shift uint) uint16 {
 	return (n << shift) | (n >> (16 - shift))
 }
@@ -70,7 +72,7 @@ func (cipher *Simon32Cipher) Decrypt(dst, src []byte) {
 	}
 	x := uint16(src[0]) | (uint16(src[1]) << 8)
 	y := uint16(src[2]) | (uint16(src[3]) << 8)
-	for i := roundsSimon32_64 - 1; i >= 0; i -= 2 {
+	for i := roundsSimon32_64 - 1; i > 0; i -= 2 {
 		x ^= simonScramble16(y) ^ cipher.k[i]
 		y ^= simonScramble16(x) ^ cipher.k[i-1]
 	}

@@ -1,5 +1,10 @@
 package simon
 
+const (
+	roundsSimon64_96  = 42
+	roundsSimon64_128 = 44
+)
+
 func leftRotate32(n uint32, shift uint) uint32 {
 	return (n << shift) | (n >> (32 - shift))
 }
@@ -59,7 +64,7 @@ func NewSimon64(key []byte) *Simon64Cipher {
 	return cipher
 }
 
-// Simon64 has a 64-bit block length. Note that this is in bytes, not words.
+// Simon64 has a 64-bit block length.
 func (cipher *Simon64Cipher) BlockSize() int {
 	return 8
 }
@@ -86,7 +91,7 @@ func (cipher *Simon64Cipher) Encrypt(dst, src []byte) {
 func (cipher *Simon64Cipher) Decrypt(dst, src []byte) {
 	x := littleEndianBytesToUInt32(src[0:4])
 	y := littleEndianBytesToUInt32(src[4:8])
-	for i := cipher.rounds - 1; i >= 0; i -= 2 {
+	for i := cipher.rounds - 1; i > 0; i -= 2 {
 		x ^= simonScramble32(y) ^ cipher.k[i]
 		y ^= simonScramble32(x) ^ cipher.k[i-1]
 	}

@@ -8,7 +8,10 @@ import (
 
 func TestRotate(t *testing.T) {
 	if leftRotate16(0x0003, 15) != 0x8001 {
-		t.Errorf("Bad rotation")
+		t.Errorf("Bad 16-bit rotation")
+	}
+	if leftRotate24(0x00a0f12f, 3) != 0x007897d {
+		t.Errorf("Bad 24-bit rotation")
 	}
 }
 
@@ -66,6 +69,18 @@ var testVectors = []testVector{
 		NewSimon32([]byte{0x18, 0x19, 0x10, 0x11, 0x08, 0x09, 0x00, 0x01}),
 		[]byte{0x65, 0x65, 0x77, 0x68},
 		[]byte{0x9b, 0xc6, 0xbb, 0xe9},
+	},
+	testVector{
+		"Simon48/72",
+		NewSimon48([]byte{0x10, 0x11, 0x12, 0x08, 0x09, 0x0a, 0x00, 0x01, 0x02}),
+		[]byte{0x67, 0x20, 0x61, 0x6c, 0x69, 0x6e},
+		[]byte{0xac, 0xe5, 0xda, 0xac, 0x2c, 0x29},
+	},
+	testVector{
+		"Simon48/96",
+		NewSimon48([]byte{0x18, 0x19, 0x1a, 0x10, 0x11, 0x12, 0x08, 0x09, 0x0a, 0x00, 0x01, 0x02}),
+		[]byte{0x63, 0x69, 0x72, 0x6e, 0x64, 0x20},
+		[]byte{0xa5, 0x06, 0x6e, 0x56, 0xf1, 0xac},
 	},
 	testVector{
 		"Simon64/96",
@@ -155,11 +170,18 @@ func randomSlice(length int) []byte {
 func TestEncDec32(t *testing.T) {
 	var names = []string{
 		"Simon32/64",
+		"Simon48/72",
+		"Simon48/96",
 		"Simon64/96",
 		"Simon64/128",
+		"Simon128/128",
+		"Simon128/192",
+		"Simon128/256",
 	}
 	var ciphers = []cipher.Block{
 		NewSimon32(randomSlice(8)),
+		NewSimon48(randomSlice(9)),
+		NewSimon48(randomSlice(12)),
 		NewSimon64(randomSlice(12)),
 		NewSimon64(randomSlice(16)),
 		NewSimon128(randomSlice(16)),
@@ -167,7 +189,7 @@ func TestEncDec32(t *testing.T) {
 		NewSimon128(randomSlice(32)),
 	}
 
-	for _, c := range ciphers {
+	for j, c := range ciphers {
 		iv := randomSlice(c.BlockSize())
 		// We use CBC as it uses both encryption and decryption.
 		enc := cipher.NewCBCEncrypter(c, iv)
@@ -178,7 +200,7 @@ func TestEncDec32(t *testing.T) {
 		dec.CryptBlocks(ciphertext, ciphertext)
 		for i, p := range plaintext {
 			if p != ciphertext[i] {
-				t.Errorf("Encryption followed by decryption failed for %s.", names[i])
+				t.Errorf("Encryption followed by decryption failed for %s.", names[j])
 				break
 			}
 		}

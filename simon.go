@@ -6,16 +6,8 @@
 package simon
 
 const (
-	roundsSimon32_64   = 32
-	roundsSimon48_72   = 36
-	roundsSimon48_96   = 36
-	roundsSimon64_96   = 42
-	roundsSimon64_128  = 44
-	roundsSimon96_96   = 52
-	roundsSimon96_144  = 54
-	roundsSimon128_128 = 68
-	roundsSimon128_192 = 69
-	roundsSimon128_256 = 72
+	roundsSimon96_96  = 52
+	roundsSimon96_144 = 54
 
 	zSeq0 = 0xd9c3522fb386a45f
 	zSeq1 = 0x56864fb8ad0c9f71

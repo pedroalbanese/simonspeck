@@ -1,5 +1,11 @@
 package simon
 
+const (
+	roundsSimon128_128 = 68
+	roundsSimon128_192 = 69
+	roundsSimon128_256 = 72
+)
+
 func leftRotate64(n uint64, shift uint) uint64 {
 	return (n << shift) | (n >> (64 - shift))
 }
@@ -66,7 +72,7 @@ func NewSimon128(key []byte) *Simon128Cipher {
 	return cipher
 }
 
-// Simon64 has a 64-bit block length. Note that this is in bytes, not words.
+// Simon128 has a 128-bit block length.
 func (cipher *Simon128Cipher) BlockSize() int {
 	return 16
 }

@@ -1,17 +1,17 @@
-// Package simon implements the Simon family of NSA block ciphers. It
-// is a straightforward translation of the pseudocode in the paper [1]
-// into golang. This implementation is not cryptographically secure.
-// This code correctly encodes the supplied test vectors in [1] with
-// the following conventions: words are stored with a little-endian
-// representation, and the test vectors are reversed (i.e., the
-// plaintext "6565 6877" for Simon32/64 is stored as []byte{0x77,
-// 0x68, 0x65, 0x65}. I chose this convention since with it, the Simon
-// test vector plaintexts concatenate to the phrase "wheeling and
-// circling round like the pillar of dust that travellers describe
-// when there is a simoom in t".
+// Package simonspeck implements the Simon and Speck families of NSA
+// block ciphers. It is a straightforward translation of the
+// pseudocode in the paper [1] into golang. This implementation is not
+// cryptographically secure. This code correctly encodes the supplied
+// test vectors in [1] with the following conventions: words are
+// stored with a little-endian representation, and the test vectors
+// are reversed (i.e., the plaintext "6565 6877" for Simon32/64 is
+// stored as []byte{0x77, 0x68, 0x65, 0x65}. I chose this convention
+// since with it, the Simon test vector plaintexts concatenate to the
+// phrase "wheeling and circling round like the pillar of dust that
+// travellers describe when there is a simoom in t".
 //
 // [1]: http://eprint.iacr.org/2013/404
-package simon
+package simonspeck
 
 const (
 	zSeq0 = 0xd9c3522fb386a45f

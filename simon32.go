@@ -1,4 +1,4 @@
-package simon
+package simonspeck
 
 const roundsSimon32_64 = 32
 

@@ -1,4 +1,4 @@
-package simon
+package simonspeck
 
 import (
 	"crypto/cipher"

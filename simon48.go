@@ -3,10 +3,12 @@ package simon
 const (
 	roundsSimon48_72 = 36
 	roundsSimon48_96 = 36
+
+	bitMask24 = 0x00ffffff
 )
 
 func leftRotate24(n uint32, shift uint) uint32 {
-	return ((n << shift) & 0x00ffffff) | (n >> (24 - shift))
+	return ((n << shift) & bitMask24) | (n >> (24 - shift))
 }
 
 // Use NewSimon48 below to expand a Simon48 key. Simon48Cipher
@@ -59,7 +61,7 @@ func NewSimon48(key []byte) *Simon48Cipher {
 		tmp ^= leftRotate24(tmp, 23)
 		lfsrBit := (z >> uint((i-keyWords)%62)) & 1
 		cipher.k[i] = ^cipher.k[i-keyWords] ^ tmp ^ uint32(lfsrBit) ^ 3
-		cipher.k[i] &= 0x00ffffff
+		cipher.k[i] &= bitMask24
 	}
 	return cipher
 }

@@ -5,15 +5,15 @@
 // the following conventions: words are stored with a little-endian
 // representation, and the test vectors are reversed (i.e., the
 // plaintext "6565 6877" for Simon32/64 is stored as []byte{0x77,
-// 0x68, 0x65, 0x65}.
+// 0x68, 0x65, 0x65}. I chose this convention since with it, the Simon
+// test vector plaintexts concatenate to the phrase "wheeling and
+// circling round like the pillar of dust that travellers describe
+// when there is a simoom in t".
 //
 // [1]: http://eprint.iacr.org/2013/404
 package simon
 
 const (
-	roundsSimon96_96  = 52
-	roundsSimon96_144 = 54
-
 	zSeq0 = 0xd9c3522fb386a45f
 	zSeq1 = 0x56864fb8ad0c9f71
 	zSeq2 = 0x7369f885192c0ef5

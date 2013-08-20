@@ -59,6 +59,32 @@ func TestShift(t *testing.T) {
 	}
 }
 
+func TestZConstants(t *testing.T) {
+	extract := func(lfsr func(uint) uint) uint64 {
+		output := uint64(0)
+		reg := uint(1)
+		for i := uint(0); i < 64; i++ {
+			if reg&1 != 0 {
+				output |= 1 << i
+			}
+			reg = lfsr(reg)
+		}
+		return output
+	}
+	// a == 1010 in binary
+	mask := uint64(0xaaaaaaaaaaaaaaaa)
+	u := extract(ShiftU)
+	v := extract(ShiftV)
+	w := extract(ShiftW)
+
+	diffs := []uint64{u ^ zSeq0, v ^ zSeq1, u ^ mask ^ zSeq2, v ^ mask ^ zSeq3, w ^ mask ^ zSeq4}
+	for i, d := range diffs {
+		if d != 0 {
+			t.Errorf("zSeq%d is incorrect", i)
+		}
+	}
+}
+
 type testVector struct {
 	name       string
 	cipher     cipher.Block
